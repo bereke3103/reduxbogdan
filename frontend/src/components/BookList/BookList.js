@@ -1,18 +1,19 @@
 import { BsHeart, BsHeartFill } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  deleteBook,
-  toggleIsFavourite,
-} from '../../redux/books/actionCreators';
-import {
   selectAuthorFilter,
   selectOnlyFavoriteFilter,
   selectTitleFilter,
 } from '../../redux/slice/filterSlice';
 import './BookList.css';
+import {
+  deleteBook,
+  selectedBooks,
+  toggleIsFavourite,
+} from '../../redux/slice/booksSlice';
 
 const BookList = () => {
-  const books = useSelector((state) => state.books); //название редюсера, где мы указали в store
+  const books = useSelector(selectedBooks); //название редюсера, где мы указали в store
   const selectedTitle = useSelector(selectTitleFilter);
   const selectedAuthor = useSelector(selectAuthorFilter);
   const selectedOnlyFavourite = useSelector(selectOnlyFavoriteFilter);
