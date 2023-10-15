@@ -27,7 +27,6 @@ const BookList = () => {
   };
 
   const filteredBooks = books.filter((book) => {
-    console.log({ book });
     const matchesTitle = book.title
       .toLowerCase()
       .includes(selectedTitle.toLowerCase());
@@ -77,7 +76,8 @@ const BookList = () => {
             <li key={book.id}>
               <div className="book-info">
                 {++i}. {hightLightMatch(book.title, selectedTitle)} by{' '}
-                <strong>{hightLightMatch(book.author, selectedAuthor)}</strong>
+                <strong>{hightLightMatch(book.author, selectedAuthor)}</strong>{' '}
+                ({book.source})
               </div>
               <div className="book-actions" style={{ cursor: 'pointer' }}>
                 <span onClick={() => handleIsFavourite(book.id)}>

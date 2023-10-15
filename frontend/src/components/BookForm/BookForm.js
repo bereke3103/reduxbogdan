@@ -3,28 +3,42 @@ import { useDispatch } from 'react-redux';
 import booksData from '../../data/books.json';
 import { createBookWithId } from '../../utils/createBookWithId';
 import './BookForm.css';
-import { addBook } from '../../redux/slice/booksSlice';
+
+import {
+  addBook,
+  // thunFunction,
+  fetchBook,
+} from '../../redux/slice/booksSlice';
 const BookForm = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const dispatch = useDispatch();
 
-  const handleRandomBook = () => {
-    const indexBook = Math.floor(Math.random() * booksData.length);
-    const itemBook = booksData[indexBook];
-
-    dispatch(addBook(createBookWithId(itemBook)));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (title && author) {
-      dispatch(addBook(createBookWithId({ title, author })));
+      dispatch(addBook(createBookWithId({ title, author }, 'USUALLY')));
       setTitle('');
       setAuthor('');
     }
   };
+
+  const handleRandomBook = () => {
+    const indexBook = Math.floor(Math.random() * booksData.length);
+    const itemBook = booksData[indexBook];
+
+    dispatch(addBook(createBookWithId(itemBook, 'RANDOM')));
+  };
+
+  const handleRandomBookViaApi = async () => {
+    //функция thunkFunction БЕЗ интеграции с redux
+    // dispatch(thunFunction);
+
+    //функция thunkFunction C интеграцией с redux
+    dispatch(fetchBook());
+  };
+
   return (
     <div className="app-block book-form">
       <h2>Add a New Book</h2>
@@ -49,7 +63,10 @@ const BookForm = () => {
 
           <button type="submit">Add Book</button>
           <button className="button" onClick={handleRandomBook}>
-            Random Book
+            Add Random Book
+          </button>
+          <button className="button" onClick={handleRandomBookViaApi}>
+            Add Random Book via API
           </button>
         </div>
       </form>
