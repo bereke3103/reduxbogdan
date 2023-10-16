@@ -9,6 +9,7 @@ import {
   // thunFunction,
   fetchBook,
 } from '../../redux/slice/booksSlice';
+import { setError } from '../../redux/slice/errorSlice';
 const BookForm = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -21,6 +22,8 @@ const BookForm = () => {
       dispatch(addBook(createBookWithId({ title, author }, 'USUALLY')));
       setTitle('');
       setAuthor('');
+    } else {
+      dispatch(setError('You have to fill title and author'));
     }
   };
 
@@ -36,7 +39,7 @@ const BookForm = () => {
     // dispatch(thunFunction);
 
     //функция thunkFunction C интеграцией с redux
-    dispatch(fetchBook());
+    dispatch(fetchBook('http://localhost:4000/random-book'));
   };
 
   return (
@@ -62,10 +65,14 @@ const BookForm = () => {
           />
 
           <button type="submit">Add Book</button>
-          <button className="button" onClick={handleRandomBook}>
+          <button className="button" type="button" onClick={handleRandomBook}>
             Add Random Book
           </button>
-          <button className="button" onClick={handleRandomBookViaApi}>
+          <button
+            className="button"
+            type="button"
+            onClick={handleRandomBookViaApi}
+          >
             Add Random Book via API
           </button>
         </div>

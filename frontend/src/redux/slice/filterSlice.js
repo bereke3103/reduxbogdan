@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initalState = {
+const initialState = {
   title: '',
   author: '',
   onlyFavorutie: false,
@@ -8,7 +8,7 @@ const initalState = {
 
 const filterSlice = createSlice({
   name: 'filter',
-  initialState: initalState,
+  initialState,
   //при импортировании мы импортируем actionCreators
   reducers: {
     setTitleFilter: (state, action) => {
@@ -26,7 +26,7 @@ const filterSlice = createSlice({
     },
     resetFilters: () => {
       //state.title = '';
-      return initalState;
+      return initialState;
     },
   },
 });

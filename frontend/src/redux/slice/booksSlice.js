@@ -2,16 +2,23 @@ import { createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { createBookWithId } from '../../utils/createBookWithId';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { setError } from './errorSlice';
 
 const initialState = [];
 
 //заместо thunkFunction мы можем использовать createAsyncThunk для создания своего action, где указано первым аргументом
-export const fetchBook = createAsyncThunk('books/fetchBook', async () => {
-  const bookViaApi = await axios.get('http://localhost:4000/random-book');
-
-  console.log({ bookViaApi });
-  return bookViaApi.data;
-});
+export const fetchBook = createAsyncThunk(
+  'books/fetchBook',
+  async (url, thunkAPI) => {
+    try {
+      const bookViaApi = await axios.get(url);
+      return bookViaApi.data;
+    } catch (error) {
+      thunkAPI.dispatch(setError(error.message));
+      throw error;
+    }
+  }
+);
 
 const booksSlice = createSlice({
   name: 'books',
@@ -32,6 +39,13 @@ const booksSlice = createSlice({
         }
       });
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchBook.fulfilled, (state, action) => {
+      if (action.payload.author && action.payload.title) {
+        state.push(createBookWithId(action.payload, 'API'));
+      }
+    });
   },
 });
 
