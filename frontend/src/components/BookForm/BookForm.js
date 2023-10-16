@@ -1,18 +1,24 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import booksData from '../../data/books.json';
 import { createBookWithId } from '../../utils/createBookWithId';
 import './BookForm.css';
+import { FaSpinner } from 'react-icons/fa';
 
 import {
   addBook,
   // thunFunction,
   fetchBook,
+  selectIsLoadingViaApi,
 } from '../../redux/slice/booksSlice';
 import { setError } from '../../redux/slice/errorSlice';
 const BookForm = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
+
+  const isLoadingViaApi = useSelector(selectIsLoadingViaApi);
+  // const [isLoading, setIsLoading] = useState(false);
+
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
@@ -34,12 +40,27 @@ const BookForm = () => {
     dispatch(addBook(createBookWithId(itemBook, 'RANDOM')));
   };
 
-  const handleRandomBookViaApi = async () => {
+  //!здесь мы использовали для локального состояния useState isLoading
+  // const handleRandomBookViaApi = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     //функция thunkFunction БЕЗ интеграции с redux
+  //     // dispatch(thunFunction);
+
+  //     //функция thunkFunction C интеграцией с redux
+  //     await dispatch(fetchBook('http://localhost:4000/random-book-delay'));
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  //!Здесь мы центролизвали в redux store isLoading
+  const handleRandomBookViaApi = () => {
     //функция thunkFunction БЕЗ интеграции с redux
     // dispatch(thunFunction);
 
     //функция thunkFunction C интеграцией с redux
-    dispatch(fetchBook('http://localhost:4000/random-book'));
+    dispatch(fetchBook('http://localhost:5000/random-book-delay'));
   };
 
   return (
@@ -71,9 +92,20 @@ const BookForm = () => {
           <button
             className="button"
             type="button"
+            disabled={isLoadingViaApi}
             onClick={handleRandomBookViaApi}
+            style={{ cursor: isLoadingViaApi ? 'wait' : 'pointer' }}
           >
-            Add Random Book via API
+            {isLoadingViaApi ? (
+              <>
+                <span>
+                  Loading book...
+                  <FaSpinner className="spinner" />{' '}
+                </span>
+              </>
+            ) : (
+              ' Add Random Book via API'
+            )}
           </button>
         </div>
       </form>

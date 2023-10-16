@@ -4,7 +4,10 @@ import { createBookWithId } from '../../utils/createBookWithId';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { setError } from './errorSlice';
 
-const initialState = [];
+const initialState = {
+  books: [],
+  isLoadingViaApi: false,
+};
 
 //заместо thunkFunction мы можем использовать createAsyncThunk для создания своего action, где указано первым аргументом
 export const fetchBook = createAsyncThunk(
@@ -14,8 +17,16 @@ export const fetchBook = createAsyncThunk(
       const bookViaApi = await axios.get(url);
       return bookViaApi.data;
     } catch (error) {
-      thunkAPI.dispatch(setError(error.message));
-      throw error;
+      thunkAPI.dispatch(setError(`Произошла ошибка: ${error.message}`));
+
+      //OPTION1
+      //ВАРИАНТ 1
+      // throw error;
+
+      //OPTION2
+      //ВАРИАНТ 2
+      //этот вариант предпочтительнее
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
@@ -25,15 +36,18 @@ const booksSlice = createSlice({
   initialState,
   reducers: {
     addBook: (state, action) => {
-      state.push(action.payload);
+      state.books.push(action.payload);
     },
 
     deleteBook: (state, action) => {
-      return state.filter((book) => book.id !== action.payload);
+      return {
+        ...state,
+        books: state.books.filter((book) => book.id !== action.payload),
+      };
     },
 
     toggleIsFavourite: (state, action) => {
-      state.forEach((book) => {
+      state.books.forEach((book) => {
         if (book.id === action.payload) {
           book.isFavourite = !book.isFavourite;
         }
@@ -43,23 +57,38 @@ const booksSlice = createSlice({
 
   //OPTION1
   //ВАРИАНТ 1
-  // extraReducers: {
-  //   [fetchBook.fulfilled]: (state, action) => {
-  //     if (action.payload.title && action.payload.author) {
-  //       state.push(createBookWithId(action.payload, 'API'));
-  //     }
-  //   },
-  // },
+  //через вычисляеиое свойство объекта
+  extraReducers: {
+    [fetchBook.pending]: (state) => {
+      state.isLoadingViaApi = true;
+    },
+    [fetchBook.fulfilled]: (state, action) => {
+      state.isLoadingViaApi = false;
+      if (action.payload.title && action.payload.author) {
+        state.books.push(createBookWithId(action.payload, 'API'));
+      }
+    },
+    [fetchBook.rejected]: (state) => {
+      state.isLoadingViaApi = false;
+    },
+  },
 
   //OPTION2
   //ВАРИАНТ 2
-  extraReducers: (builder) => {
-    builder.addCase(fetchBook.fulfilled, (state, action) => {
-      if (action.payload.author && action.payload.title) {
-        state.push(createBookWithId(action.payload, 'API'));
-      }
-    });
-  },
+  // extraReducers: (builder) => {
+  //   builder.addCase(fetchBook.pending, (state) => {
+  //     state.isLoadingViaApi = true;
+  //   });
+  //   builder.addCase(fetchBook.fulfilled, (state, action) => {
+  //     if (action.payload.author && action.payload.title) {
+  //       state.isLoadingViaApi = false;
+  //       state.books.push(createBookWithId(action.payload, 'API'));
+  //     }
+  //   });
+  //   builder.addCase(fetchBook.rejected, (state) => {
+  //     state.isLoadingViaApi = false;
+  //   });
+  // },
 });
 
 //ЭТА АСИНХРОННАЯ ФУНКЦИЯ БЕЗ ИНТЕГРАЦИИ В REDUX, но он рабочий, для того, чтобы у него был отдельный action, мы можем можем использоваться CreateAsyncThunk, в котором первым аргументом функции мы указываем action, который должен совпадать с name reducer
@@ -78,5 +107,6 @@ export const thunFunction = async (dispatch, getState) => {
 };
 
 export const { addBook, deleteBook, toggleIsFavourite } = booksSlice.actions;
-export const selectedBooks = (state) => state.books;
+export const selectedBooks = (state) => state.books.books;
+export const selectIsLoadingViaApi = (state) => state.books.isLoadingViaApi;
 export default booksSlice.reducer;
